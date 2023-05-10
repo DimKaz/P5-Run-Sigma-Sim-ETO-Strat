@@ -3,7 +3,6 @@ import math
 import random
 from PIL import Image, ImageTk
 import time
-import asyncio
 
 class CircleButtonsGUI:
     def __init__(self):
@@ -16,6 +15,8 @@ class CircleButtonsGUI:
         self.background_image = Image.open("arena.png")
         self.background_image = self.background_image.resize((500, 500), Image.LANCZOS)
         self.background_image_resized = ImageTk.PhotoImage(self.background_image)
+        
+        self.duration = 0
 
         self.midImg = tk.PhotoImage(file="mid.PNG")
         self.remoteimg = tk.PhotoImage(file="remote.PNG")
@@ -42,10 +43,15 @@ class CircleButtonsGUI:
         self.newButton.pack()
         self.newButton.place(x=0, y=0)
         # Bind canvas resizing to update button positions and grid size
+        
+        self.timeBox = tk.Text(self.bg_label, bg="dark blue", fg="white", bd=1, height=1, width=10)
+        self.timeBox.pack()
+        self.timeBox.place(relx=1, rely=0, anchor='ne')
             
     def update_canvas(self):
         self.canvas.destroy()
         self.front_label.destroy()
+        self.timeBox.destroy()
     
         self.correct = -1
         mid = bool(random.getrandbits(1))
@@ -92,12 +98,6 @@ class CircleButtonsGUI:
                     else:
                         self.correct = 7
                 
-                
-        #print(mid)
-        #print(position)
-        #print(unmarked)
-        #print(self.correct)
-        
         # Set the front image inside the frame
         if(mid):
             self.front_label = tk.Label(self.frame, image=self.midImg)
@@ -107,6 +107,10 @@ class CircleButtonsGUI:
         
         self.canvas = tk.Canvas(self.canFrame, width=150, height=75, bg="#00a2e8",bd=0,highlightthickness=0)
         self.canvas.pack()
+        
+        self.timeBox = tk.Text(self.bg_label, bg="dark blue", fg="white", bd=1, height=1, width=10)
+        self.timeBox.pack()
+        self.timeBox.place(relx=1, rely=0, anchor='ne')
         
         self.num_buttons = 8
         self.buttons = []
@@ -124,7 +128,6 @@ class CircleButtonsGUI:
         
         # Create buttons on canvas
         self.button_colors = ["lightgray"] * self.num_buttons
-        self.hide = False * self.num_buttons
         for i in range(self.num_buttons):
             button = tk.Button(self.bg_label, text=f"{i}", command=lambda i=i: self.button_click(i), bg=self.button_colors[i], activebackground="dark blue", relief="raised", width=4, height=2, padx=2, pady=2)
             xPos, yPos = self.button_positions[i]
@@ -150,34 +153,18 @@ class CircleButtonsGUI:
                 else:
                     player = self.canvas.create_rectangle(x, y, x + self.grid_square_size, y + self.grid_square_size, fill="dark orange", outline=playerOutline, width=5)
                 self.grid_squares.append(player)
-        #self.canvas.place(relx=0.5, rely=0.7, anchor='center')
-        #self.canvas.pack()
                 
     def button_click(self, button_index):
         if button_index == self.correct:
             self.buttons[button_index].config(bg="green")
+            self.duration = (time.time() - self.duration)
+            self.timeBox.insert(tk.END, str(self.duration))
         else:
             self.buttons[button_index].config(bg="red")
-            #if(self.hide):
-            #    self.bg_label.itemconfigure(self.buttons[i], state="hidden")
                 
     def button_newGame(self):
         self.update_canvas()
-        #self.countdown(3)
-  
-  #total phase is ~10sec
-    # define the countdown func.
-     #def countdown(self, t):
-     #   
-     #   while t:
-     #       mins, secs = divmod(t, 60)
-     #       timer = '{:02d}:{:02d}'.format(mins, secs)
-     #       print(timer, end="\r")
-     #       asyncio.sleep(t)
-     #       t -= 1
-     #     
-     #   print('Fire in the hole!!')
-
+        self.duration = time.time()
 
                 
     def run(self):
